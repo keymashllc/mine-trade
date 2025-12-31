@@ -23,7 +23,7 @@ export default function MarketPage() {
     const userData = JSON.parse(userStr);
     setUser(userData);
     loadMarket(userData.sector);
-  }, []);
+  }, [router, loadMarket]);
 
   const loadMarket = async (sector: string) => {
     try {

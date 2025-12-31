@@ -20,7 +20,7 @@ export default function JournalPage() {
     const userData = JSON.parse(userStr);
     setUser(userData);
     loadJournal(userData.id);
-  }, []);
+  }, [router, loadJournal]);
 
   const loadJournal = async (userId: string) => {
     try {

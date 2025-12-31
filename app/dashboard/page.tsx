@@ -28,7 +28,7 @@ export default function DashboardPage() {
     const userData = JSON.parse(userStr);
     setUser(userData);
     loadRun(userData.id);
-  }, []);
+  }, [router, loadRun]);
 
   const loadRun = async (userId: string) => {
     try {

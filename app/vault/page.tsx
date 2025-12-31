@@ -20,7 +20,7 @@ export default function VaultPage() {
     const userData = JSON.parse(userStr);
     setUser(userData);
     loadVault(userData.id);
-  }, []);
+  }, [router, loadVault]);
 
   const loadVault = async (userId: string) => {
     try {

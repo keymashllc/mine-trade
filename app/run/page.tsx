@@ -27,7 +27,7 @@ export default function RunPage() {
     }
     setUser(JSON.parse(userStr));
     loadRun();
-  }, []);
+  }, [router, loadRun]);
 
   const loadRun = async () => {
     const userStr = localStorage.getItem('user');
