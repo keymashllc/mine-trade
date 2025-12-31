@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// For production Postgres, uncomment and use:
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String
+  sector        String   @default("A") // A, B, or C
+  credits       Int      @default(500) // Starting credits
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  runs          Run[]
+  vaultBalances VaultBalances?
+  vaultSpecimens VaultSpecimen[]
+  specimenListings SpecimenListing[]
+  ownedRelics   OwnedRelic[]
+}
+
+model Sector {
+  id        String   @id @default("A") // A, B, or C
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Run {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      String   // "active", "won", "lost"
+  currentDay  Int      @default(1)
+  rigHP       Int      @default(10)
+  credits     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  dayStates   DayState[]
+  stashItems  StashItem[]
+  specimens   Specimen[]
+  relics      OwnedRelic[]
+}
+
+model DayState {
+  id          String   @id @default(cuid())
+  runId       String
+  run         Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  day         Int
+  due         Int
+  paid        Boolean  @default(false)
+  shiftsUsed  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([runId, day])
+}
+
+model StashItem {
+  id          String   @id @default(cuid())
+  runId       String
+  run         Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  metalType   String   // SOL, AES, VIR, LUN, NOC, CRN
+  units       Int
+  createdAt   DateTime @default(now())
+}
+
+model Specimen {
+  id          String   @id @default(cuid())
+  runId       String?
+  run         Run?     @relation(fields: [runId], references: [id], onDelete: Cascade)
+  metalType   String   // SOL, AES, VIR, LUN, NOC, CRN
+  form        String   // Ore, Nugget, Coin, Bar
+  grade       String   // Low, High, Ultra
+  biome       String   // Desert, Rift, Glacier
+  depth       Int      // 1, 2, or 3
+  meltUnits   Int      // Calculated: baseUnits(form) * gradeMultiplier(grade)
+  createdAt   DateTime @default(now())
+}
+
+model VaultSpecimen {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metalType   String
+  form        String
+  grade       String
+  biome       String
+  depth       Int
+  meltUnits   Int
+  createdAt   DateTime @default(now())
+  depositedAt DateTime @default(now())
+}
+
+model VaultBalances {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credits     Int      @default(0)
+  solUnits    Int      @default(0)
+  aesUnits    Int      @default(0)
+  virUnits    Int      @default(0)
+  lunUnits    Int      @default(0)
+  nocUnits    Int      @default(0)
+  crnUnits    Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model MarketPriceSnapshot {
+  id          String   @id @default(cuid())
+  sector      String   // A, B, or C
+  metalType   String   // SOL, AES, VIR, LUN, NOC, CRN
+  price       Float    // Base price in credits per unit
+  timestamp   DateTime @default(now())
+
+  @@index([sector, metalType, timestamp])
+}
+
+model SpecimenListing {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vaultSpecimenId String
+  price       Int      // Credits asking price
+  status      String   @default("active") // active, sold, cancelled
+  createdAt   DateTime @default(now())
+  soldAt      DateTime?
+  lastRelistAt DateTime?
+}
+
+model Relic {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  rarity      Int      // Weight for random selection
+  createdAt   DateTime @default(now())
+}
+
+model OwnedRelic {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runId       String?
+  run         Run?     @relation(fields: [runId], references: [id], onDelete: Cascade)
+  relicId     String
+  relic       Relic    @relation(fields: [relicId], references: [id])
+  used        Boolean  @default(false)
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+}
+
