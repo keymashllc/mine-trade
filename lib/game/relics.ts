@@ -30,7 +30,7 @@ export const RELIC_DEFINITIONS: RelicDefinition[] = [
 ];
 
 export function selectRandomRelics(count: number = 2): RelicDefinition[] {
-  const totalRarity = RELIC_DEFINITIONS.reduce((sum, r) => sum + r.rarity, 100);
+  let totalRarity = RELIC_DEFINITIONS.reduce((sum, r) => sum + r.rarity, 100);
   const selected: RelicDefinition[] = [];
   const available = [...RELIC_DEFINITIONS];
 
