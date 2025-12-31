@@ -149,6 +149,8 @@ model Relic {
   description String
   rarity      Int      // Weight for random selection
   createdAt   DateTime @default(now())
+
+  ownedRelics OwnedRelic[]
 }
 
 model OwnedRelic {
