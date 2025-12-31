@@ -34,7 +34,7 @@ export default function RunPage() {
       if (currentDayState?.paid && activeRun.currentDay < 12) {
         // Day paid, ready for next day
         setShowPayment(false);
-      } else if (!currentDayState?.paid && currentDayState?.shiftsUsed >= 2) {
+      } else if (currentDayState && !currentDayState.paid && (currentDayState.shiftsUsed ?? 0) >= 2) {
         // All shifts used, show payment
         setShowPayment(true);
       }
@@ -56,7 +56,7 @@ export default function RunPage() {
   }, [router, loadRun]);
 
   const handleMine = async () => {
-    if (!run || !selectedBiome) return;
+    if (!run || !selectedBiome || !user) return;
     try {
       const result = await executeMiningShift(run.id, user.id, selectedBiome, selectedDepth, selectedMode);
       setMiningResult(result);
@@ -67,7 +67,7 @@ export default function RunPage() {
   };
 
   const handleRepair = async () => {
-    if (!run) return;
+    if (!run || !user) return;
     const damage = 10 - run.rigHP;
     if (damage <= 0) return;
     try {
@@ -79,7 +79,7 @@ export default function RunPage() {
   };
 
   const handlePayDue = async () => {
-    if (!run) return;
+    if (!run || !user) return;
     try {
       await payDayDue(run.id, user.id, useLoanVoucher);
       await loadRun();
@@ -90,6 +90,7 @@ export default function RunPage() {
   };
 
   const handleMelt = async (specimenId: string) => {
+    if (!run || !user) return;
     try {
       await meltSpecimen(specimenId, run.id, user.id);
       await loadRun();
@@ -100,6 +101,7 @@ export default function RunPage() {
   };
 
   const handleSell = async (metalType: string, units: number) => {
+    if (!run || !user) return;
     try {
       await sellUnits(run.id, user.id, metalType, units);
       await loadRun();
@@ -124,7 +126,7 @@ export default function RunPage() {
   }
 
   const currentDayState = run.dayStates?.find((ds: any) => ds.day === run.currentDay);
-  const canMine = currentDayState && currentDayState.shiftsUsed < 2;
+  const canMine = currentDayState && (currentDayState.shiftsUsed ?? 0) < 2;
   const repairCost = (10 - run.rigHP) * 180;
   const canRepair = run.rigHP < 10 && run.credits >= repairCost;
 
@@ -163,17 +165,17 @@ export default function RunPage() {
           </div>
           <div className="bg-gray-800 p-4 rounded">
             <div className="text-sm text-gray-400">Day Due</div>
-            <div className="text-2xl font-bold">{currentDayState?.due || 0}</div>
+            <div className="text-2xl font-bold">{currentDayState?.due ?? 0}</div>
             {currentDayState && !currentDayState.paid && (
-              <div className={`text-sm mt-1 ${run.credits >= currentDayState.due ? 'text-green-400' : 'text-red-400'}`}>
-                {run.credits >= currentDayState.due ? 'Can pay' : 'Cannot pay'}
+              <div className={`text-sm mt-1 ${run.credits >= (currentDayState.due ?? 0) ? 'text-green-400' : 'text-red-400'}`}>
+                {run.credits >= (currentDayState.due ?? 0) ? 'Can pay' : 'Cannot pay'}
               </div>
             )}
           </div>
           <div className="bg-gray-800 p-4 rounded">
             <div className="text-sm text-gray-400">Shifts</div>
             <div className="text-2xl font-bold">
-              {currentDayState?.shiftsUsed || 0}/2
+              {(currentDayState?.shiftsUsed ?? 0)}/2
             </div>
           </div>
         </div>
@@ -182,9 +184,9 @@ export default function RunPage() {
           <div className="bg-yellow-900/50 border border-yellow-600 p-6 rounded mb-6">
             <h2 className="text-2xl font-bold mb-4">Pay Day Due</h2>
             <div className="mb-4">
-              <div>Due: {currentDayState.due} credits</div>
+              <div>Due: {currentDayState.due ?? 0} credits</div>
               <div>You have: {run.credits} credits</div>
-              {run.credits < currentDayState.due && (
+              {run.credits < (currentDayState.due ?? 0) && (
                 <div className="mt-2">
                   <label className="flex items-center gap-2">
                     <input
@@ -279,6 +281,7 @@ export default function RunPage() {
                     <button
                       key={r.id}
                       onClick={async () => {
+                        if (!run || !user) return;
                         try {
                           const { claimRelic } = await import('@/app/actions/mining');
                           await claimRelic(run.id, user.id, r.id);

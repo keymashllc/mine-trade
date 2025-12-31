@@ -160,13 +160,13 @@ export default function DashboardPage() {
               <div className="bg-gray-700 p-4 rounded">
                 <div className="text-sm text-gray-400">Day Due</div>
                 <div className="text-2xl font-bold">
-                  {currentDayState?.due || 0}
+                  {currentDayState?.due ?? 0}
                 </div>
               </div>
               <div className="bg-gray-700 p-4 rounded">
                 <div className="text-sm text-gray-400">Shifts Used</div>
                 <div className="text-2xl font-bold">
-                  {currentDayState?.shiftsUsed || 0}/2
+                  {(currentDayState?.shiftsUsed ?? 0)}/2
                 </div>
               </div>
             </div>
