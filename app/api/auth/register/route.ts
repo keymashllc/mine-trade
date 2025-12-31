@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const user = await createUser(email, username, password);
 
     return NextResponse.json(
-      { id: user.id, email: user.email, username: user.username },
+      { id: user.id, email: user.email, username: user.username, sector: user.sector },
       { status: 201 }
     );
   } catch (error) {
@@ -39,8 +39,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     console.error('Registration error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Registration failed' },
+      { error: 'Registration failed', details: errorMessage },
       { status: 500 }
     );
   }
