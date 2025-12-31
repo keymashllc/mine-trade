@@ -24,6 +24,7 @@ model User {
   passwordHash  String
   sector        String   @default("A") // A, B, or C
   credits       Int      @default(500) // Starting credits
+  journalUnlocks String  @default("") // Comma-separated unlock IDs: "metal_mastery,ultra_trio,biome_trio"
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -32,6 +33,7 @@ model User {
   vaultSpecimens VaultSpecimen[]
   specimenListings SpecimenListing[]
   ownedRelics   OwnedRelic[]
+  marketDumps   MarketDump[]
 }
 
 model Sector {
@@ -48,6 +50,9 @@ model Run {
   currentDay  Int      @default(1)
   rigHP       Int      @default(10)
   credits     Int      @default(0)
+  stashSlots  Int      @default(12) // Current max slots
+  stashSlotsUsed Int    @default(0) // Currently used slots
+  slotUpgradeUsed Boolean @default(false) // Whether +4 slot upgrade was purchased
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -64,7 +69,9 @@ model DayState {
   day         Int
   due         Int
   paid        Boolean  @default(false)
-  shiftsUsed  Int      @default(0)
+  shiftsUsed  Int      @default(0) // Deprecated - using depth track now
+  depthTrackNode Int   @default(0) // Current node (0-4, 0 = not started, 5 = extracted)
+  depthTrackExtracted Boolean @default(false) // Whether player extracted early
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -164,5 +171,32 @@ model OwnedRelic {
   used        Boolean  @default(false)
   usedAt      DateTime?
   createdAt   DateTime @default(now())
+}
+
+model MarketAnomaly {
+  id          String   @id @default(cuid())
+  sector      String   // A, B, or C
+  metalType   String   // SOL, AES, VIR, LUN, NOC, CRN
+  startTime   DateTime @default(now())
+  endTime     DateTime // startTime + 30 seconds
+  multiplier  Float    @default(1.25) // +25% sell price
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  @@index([sector, active, endTime])
+}
+
+model MarketDump {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metalType   String   // SOL, AES, VIR, LUN, NOC, CRN
+  day         DateTime @default(now()) // Date (day level, not timestamp)
+  unitsSold   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, metalType, day])
+  @@index([userId, day])
 }
 

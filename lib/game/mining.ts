@@ -101,7 +101,7 @@ export function mineVein(
   return { damage, drop };
 }
 
-function selectMetalForBiome(biome: Biome): MetalType {
+export function selectMetalForBiome(biome: Biome): MetalType {
   const weights = BIOME_METAL_WEIGHTS[biome];
   const items = Object.entries(weights)
     .filter(([_, weight]) => weight > 0)
@@ -113,7 +113,7 @@ function selectMetalForBiome(biome: Biome): MetalType {
   return weightedChoice(items);
 }
 
-function selectGradeForDepth(depth: Depth): Grade {
+export function selectGradeForDepth(depth: Depth): Grade {
   const distribution = DEPTH_GRADE_DISTRIBUTION[depth];
   return weightedChoice([
     { item: 'Low' as Grade, weight: distribution.Low },
