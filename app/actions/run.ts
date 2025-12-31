@@ -99,18 +99,20 @@ export async function repairRig(runId: string, userId: string, damage: number) {
 export async function payDayDue(runId: string, userId: string, useLoanVoucher: boolean = false) {
   const run = await prisma.run.findUnique({
     where: { id: runId },
-    include: {
-      dayStates: {
-        where: { day: run.currentDay },
-      },
-    },
   });
 
   if (!run || run.userId !== userId) {
     throw new Error('Run not found');
   }
 
-  const dayState = run.dayStates[0];
+  const dayState = await prisma.dayState.findUnique({
+    where: {
+      runId_day: {
+        runId,
+        day: run.currentDay,
+      },
+    },
+  });
   if (!dayState) {
     throw new Error('Day state not found');
   }
