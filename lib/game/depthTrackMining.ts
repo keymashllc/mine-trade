@@ -17,9 +17,10 @@ import {
   type MetalType,
   type SpecimenForm,
   type Grade,
+  type Biome,
+  type MiningMode,
 } from './constants';
 import { random } from './rng';
-import type { Biome, MiningMode, MetalType, SpecimenForm, Grade } from './constants';
 
 export interface DepthTrackReward {
   type: 'units' | 'specimen';
