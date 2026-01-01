@@ -6,17 +6,18 @@ import ResourceIcon from './ResourceIcon';
 import * as Dialog from '@radix-ui/react-dialog';
 
 interface HazardModalProps {
-  hazard: HazardType;
+  hazard: HazardType | null;
   open: boolean;
   onChoice1: () => void;
   onChoice2: () => void;
 }
 
 export default function HazardModal({ hazard, open, onChoice1, onChoice2 }: HazardModalProps) {
-  if (!hazard) return null;
+  if (!hazard || !open) return null;
   
   const choices = getHazardChoices(hazard);
   const iconName = getHazardIcon(hazard);
+  const hazardName = hazard.replace(/_/g, ' ');
 
   return (
     <Dialog.Root open={open}>
@@ -25,13 +26,13 @@ export default function HazardModal({ hazard, open, onChoice1, onChoice2 }: Haza
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border-2 border-red-600 rounded-lg p-8 z-50 max-w-md w-full mx-4">
           <div className="text-center mb-6">
             <div className="mb-4">
-              <ResourceIcon iconName={iconName} alt={hazard} size={64} />
+              <ResourceIcon iconName={iconName} alt={hazardName} size={64} />
             </div>
             <Dialog.Title className="text-3xl font-bold text-red-400 mb-2">
               HAZARD!
             </Dialog.Title>
             <Dialog.Description className="text-gray-300 capitalize">
-              {hazard ? hazard.replace('_', ' ') : 'Unknown Hazard'}
+              {hazardName}
             </Dialog.Description>
           </div>
 
