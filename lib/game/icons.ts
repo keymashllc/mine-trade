@@ -58,3 +58,7 @@ export function getIconPath(iconName: string): string {
   return `/images/${iconName}.png`;
 }
 
+// Re-export hazard types for convenience
+export type { HazardType } from './depthTrack';
+export { getHazardChoices } from './depthTrack';
+
